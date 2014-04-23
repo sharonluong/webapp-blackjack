@@ -1,0 +1,11 @@
+Hello! Your cards are:
+<% session[:player_cards].each do |card| %>
+	<%= card.to_s %>
+<% end %>
+
+Your total is <%= calculate_total(session[:player_cards]) %>.
+
+The dealer's cards are:
+<% session[:dealer_cards].each do |card| %>
+	<%= card.to_s %>
+<% end %>
