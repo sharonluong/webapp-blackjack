@@ -4,7 +4,7 @@ require 'sinatra'
 set :sessions, true
 
 get '/' do
-	"Hello!"
+	redirect '/new_game'
 end
 
 get '/new_game' do
