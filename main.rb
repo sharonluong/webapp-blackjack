@@ -70,7 +70,12 @@ end
 
 post '/new_game' do
 	session[:player_name] = params[:player_name]
-	redirect '/game'
+	if params[:player_name].empty?
+		@error = "Please put in a player name."
+		halt erb(:new_game)
+	else
+		redirect '/game'
+	end
 end
 
 #get '/bet' do 
