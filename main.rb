@@ -42,6 +42,15 @@ helpers do
 		"<img src='/images/cards/#{suit}_#{value}.jpg'>"
 	end
 
+	def cash_total(bet)
+		cash_amount = 500
+		if @error
+			cash_amount -= bet
+		elsif @yay
+			cash_amount += bet
+		end
+	end
+
 end
 
 before do 
@@ -59,17 +68,17 @@ end
 
 post '/new_game' do
 	session[:player_name] = params[:player_name]
-	redirect '/bet'
-end
-
-get '/bet' do 
-	erb :bet
-end
-
-post '/bet' do 
-	session[:bet] = params[:bet]
 	redirect '/game'
 end
+
+#get '/bet' do 
+	#erb :bet
+#end
+
+#post '/bet' do 
+	#session[:player_bet] = params[:player_bet]
+	#redirect '/game'
+#end
 
 get '/game' do
 	suits = %w[diamonds clubs hearts spades]
