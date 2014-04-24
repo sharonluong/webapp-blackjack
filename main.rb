@@ -130,9 +130,14 @@ post '/game/dealer/hit' do
 		calculate_total(session[:dealer_cards])
 	end
 
+	erb :game
+end
 
+post '/game/dealer/stay' do 
+	
 	if calculate_total(session[:dealer_cards]) == 21
 		@error = "The dealer has 21. You lost!"
+		@show_dealer_cards = false
 	elsif calculate_total(session[:dealer_cards]) < 21
 		if calculate_total(session[:player_cards]) > calculate_total(session[:dealer_cards])
 			@yay = "The dealer has " + calculate_total(session[:dealer_cards]).to_s + ". You beat the dealer! You win."
