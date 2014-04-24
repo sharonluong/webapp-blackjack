@@ -56,6 +56,7 @@ end
 before do 
 	@show_decision = true
 	@show_dealer_cards = false
+	@not_show_first = true
 end
 
 get '/' do
@@ -93,63 +94,90 @@ get '/game' do
 	session[:dealer_cards] << session[:deck].pop
 
 	if calculate_total(session[:player_cards]) == 21
-		@yay = "You got 21. You win!"
+		@yay = "#{session[:player_name]} got 21. #{session[:player_name]} wins!"
+		@show_dealer_cards = false
+		@show_decision = false
+		@not_show_first = false
+		@show_dealer_hit = false
 	end
 	
 	erb :game
 end
 
 post '/game/player/hit' do 
+	@show_dealer_cards = false
 	session[:player_cards] << session[:deck].pop
 
 	if calculate_total(session[:player_cards]) > 21
-		@error = 'You busted! Game over.'
+		@error = "#{session[:player_name]} busted! Game over."
 		@show_decision = false
+		@show_dealer_hit = false
+		@show_dealer_cards = true
 	elsif calculate_total(session[:player_cards]) == 21
-		@yay = "You got 21. You win!"
+		@yay = "#{session[:player_name]} got 21. #{session[:player_name]} wins!"
 		@show_decision = false
+		@show_dealer_cards = true
 	end
 
 	erb :game
 end
 
 post '/game/player/stay' do 
+	redirect '/game/dealer'
+end
+
+get '/game/dealer' do
 	@show_decision = false
+	@not_show_first = false
 	@show_dealer_cards = true
+
+ 	if calculate_total(session[:dealer_cards]) == 21
+		@error = "The dealer has 21. #{session[:player_name]} lost!"
+		@not_show_first = false
+	elsif calculate_total(session[:dealer_cards]) > 21
+		@yay = "Dealer busted. #{session[:player_name]} wins!"
+		@not_show_first = false
+	elsif calculate_total(session[:dealer_cards]) >= 17
+		redirect '/game/compare'
+	end
+
+	while calculate_total(session[:dealer_cards]) < 17
+		@show_dealer_hit = true
+	end
+
 	erb :game
 end
 
 post '/game/dealer/hit' do 
 	@show_decision = false
-	@show_dealer_cards = false
+	@not_show_first = false
+	@show_dealer_cards = true
+	
+	session[:dealer_cards] << session[:deck].pop
+	calculate_total(session[:dealer_cards])
 
 
-	while calculate_total(session[:dealer_cards]) < 17
-		@show_dealer_cards = true
-		session[:dealer_cards] << session[:deck].pop
-		calculate_total(session[:dealer_cards])
-	end
-
+	@show_dealer_cards = true
+	@show_dealer_hit = false
+	
 	erb :game
 end
 
-post '/game/dealer/stay' do 
-	
-	if calculate_total(session[:dealer_cards]) == 21
-		@error = "The dealer has 21. You lost!"
-		@show_dealer_cards = false
-	elsif calculate_total(session[:dealer_cards]) < 21
-		if calculate_total(session[:player_cards]) > calculate_total(session[:dealer_cards])
-			@yay = "The dealer has " + calculate_total(session[:dealer_cards]).to_s + ". You beat the dealer! You win."
-		elsif calculate_total(session[:player_cards]) < calculate_total(session[:dealer_cards])
+get '/game/compare' do 
+
+	@not_show_first = false
+	if calculate_total(session[:player_cards]) > calculate_total(session[:dealer_cards])
+		@yay = "The dealer has " + calculate_total(session[:dealer_cards]).to_s + ". You beat the dealer! You win."
+	elsif calculate_total(session[:player_cards]) < calculate_total(session[:dealer_cards])
 			@error = "The dealer has " + calculate_total(session[:dealer_cards]).to_s + ". You lost!"
-		else
-			@tie = "You tied the dealer."
-		end
+	else
+		@tie = "You tied the dealer."
 	end
-	
-	erb :game
+
+erb :game
 end
+
+
 
 
 

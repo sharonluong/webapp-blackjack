@@ -6,7 +6,13 @@
 </div>
 
 <div class = "well">
-	<%if @show_dealer_cards %>
+	<% if @not_show_first %>
+		<div>
+			<p> The dealer's cards are: </p>
+				<img src='/images/cards/cover.jpg'>
+				<%= card_image((session[:dealer_cards])[1]) %>
+		</div>
+	<% elsif @show_dealer_cards %>
 		<div>
 			<div>
 				<p>The dealer's cards are: </p>
@@ -14,18 +20,13 @@
 					<%= card_image(card) %>
 				<% end %>
 			</div>
+	<% end %>
+	<% if @show_dealer_hit %>
 			<form action ="/game/dealer/hit" method="POST">
 				<input type="submit" class = "btn btn-primary" value="See dealer's next card">
 			</form>
 		</div>
-	<% else %>
-		<div>
-			<p> The dealer's cards are: </p>
-				<img src='images/cards/cover.jpg'>
-				<%= card_image((session[:dealer_cards])[1]) %>
-		</div>
-	<% end %>
-	
+	<% end %>	
 </div>
 
 <% if @show_decision %>
