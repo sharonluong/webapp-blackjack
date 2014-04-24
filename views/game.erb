@@ -1,3 +1,10 @@
+<% if @show_new_game %>
+  <div class="alert alert-info show_game">
+  	<p class = "horizontal">Would you like to play again?</p>
+  	<form action="/game" method="GET" class = "horizontal"><button type="submit" class = "btn" action="/game">Yes</button></form>
+  </div>
+<% end %>
+
 <div class = "well">
 	<p> Your cards are:</p>
 	<% session[:player_cards].each do |card| %>
@@ -14,14 +21,14 @@
 		</div>
 	<% elsif @show_dealer_cards %>
 		<div>
-			<div>
-				<p>The dealer's cards are: </p>
-				<% session[:dealer_cards].each do |card| %>
-					<%= card_image(card) %>
-				<% end %>
-			</div>
+			<p>The dealer's cards are: </p>
+			<% session[:dealer_cards].each do |card| %>
+				<%= card_image(card) %>
+			<% end %>
+		</div>
 	<% end %>
 	<% if @show_dealer_hit %>
+		<div class = "space">
 			<form action ="/game/dealer/hit" method="POST">
 				<input type="submit" class = "btn btn-primary" value="See dealer's next card">
 			</form>
@@ -32,11 +39,13 @@
 <% if @show_decision %>
 	<div>
 		<h4>Your total is <%= calculate_total(session[:player_cards]) %>. Would you like to hit or stay? </h4>
-		<form action ="/game/player/hit" method="POST">
-			<input type="submit" class = "btn btn-info" value="Hit">
-		</form>
-		<form action="/game/player/stay" method="POST">
-			<input type="submit" class = "btn btn-warning" value="Stay">
-		</form>
+		<div>
+			<form action ="/game/player/hit" method="POST" class = "bottom_button">
+				<input type="submit" class = "btn btn-info" value="Hit">
+			</form>
+			<form action="/game/player/stay" method="POST" class = "bottom_button">
+				<input type="submit" class = "btn btn-warning" value="Stay">
+			</form>
+		</div>
 	</div>
 <% end %>

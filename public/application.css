@@ -1,0 +1,16 @@
+.show_game {
+	height: 30px;
+}
+
+.horizontal {
+	display: inline-block;
+}
+
+form.bottom_button {
+	float: left;
+	margin-right: 10px;
+}
+
+.space {
+	margin-top: 15px;
+}
