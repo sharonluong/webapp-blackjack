@@ -26,6 +26,27 @@ helpers do
 		total
 	end
 
+	def card_image(card)
+		value = card[0]
+			if ['A', 'J', 'Q', 'K'].include?(value)
+				value = case card[0]
+					when 'A' then 'ace'
+					when 'K' then 'king'
+					when 'Q' then 'queen'
+					when 'J' then 'jack'
+				end
+			end
+
+		suit = card[1]
+
+		"<img src='/images/cards/#{suit}_#{value}.jpg'>"
+	end
+
+end
+
+before do 
+	@show_decision = true
+	@show_dealer_cards = false
 end
 
 get '/' do
@@ -69,23 +90,37 @@ get '/game' do
 	erb :game
 end
 
-post '/hit' do 
+post '/game/player/hit' do 
 	session[:player_cards] << session[:deck].pop
 
 	if calculate_total(session[:player_cards]) > 21
 		@error = 'You busted! Game over.'
+		@show_decision = false
 	elsif calculate_total(session[:player_cards]) == 21
 		@yay = "You got 21. You win!"
+		@show_decision = false
 	end
 
 	erb :game
 end
 
-post '/stay' do 
+post '/game/player/stay' do 
+	@show_decision = false
+	@show_dealer_cards = true
+	erb :game
+end
+
+post '/game/dealer/hit' do 
+	@show_decision = false
+	@show_dealer_cards = false
+
+
 	while calculate_total(session[:dealer_cards]) < 17
+		@show_dealer_cards = true
 		session[:dealer_cards] << session[:deck].pop
 		calculate_total(session[:dealer_cards])
 	end
+
 
 	if calculate_total(session[:dealer_cards]) == 21
 		@error = "The dealer has 21. You lost!"
@@ -98,8 +133,7 @@ post '/stay' do
 			@tie = "You tied the dealer."
 		end
 	end
-			
-
+	
 	erb :game
 end
 

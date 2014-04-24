@@ -1,24 +1,33 @@
 <div class = "well">
 	<p> Your cards are:</p>
-		<% session[:player_cards].each do |card| %>
-			<%= card.to_s %>
-		<% end %>
+	<% session[:player_cards].each do |card| %>
+		<%= card_image(card) %>
+	<% end %>
 </div>
 
 <div class = "well">
-	<p>The dealer's cards are: </p>
+	<div>
+		<p>The dealer's cards are: </p>
 		<% session[:dealer_cards].each do |card| %>
-			<%= card.to_s %>
+			<%= card_image(card) %>
 		<% end %>
+	</div>
+	<div>
+		<%if @show_dealer_cards %>
+			<form action ="/game/dealer/hit" method="POST">
+				<input type="submit" class = "btn btn-primary" value="See dealer's next card">
+			</form>
+		<% end %>
+	</div>
 </div>
 
-<% if calculate_total(session[:player_cards]) < 21 %>
+<% if @show_decision %>
 	<div>
 		<h4>Your total is <%= calculate_total(session[:player_cards]) %>. Would you like to hit or stay? </h4>
-		<form action ="/hit" method="POST">
+		<form action ="/game/player/hit" method="POST">
 			<input type="submit" class = "btn btn-info" value="Hit">
 		</form>
-		<form action="/stay" method="POST">
+		<form action="/game/player/stay" method="POST">
 			<input type="submit" class = "btn btn-warning" value="Stay">
 		</form>
 	</div>
