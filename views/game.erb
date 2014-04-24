@@ -1,11 +1,25 @@
-Hello! Your cards are:
-<% session[:player_cards].each do |card| %>
-	<%= card.to_s %>
-<% end %>
+<div class = "well">
+	<p> Your cards are:</p>
+		<% session[:player_cards].each do |card| %>
+			<%= card.to_s %>
+		<% end %>
+</div>
 
-Your total is <%= calculate_total(session[:player_cards]) %>.
+<div class = "well">
+	<p>The dealer's cards are: </p>
+		<% session[:dealer_cards].each do |card| %>
+			<%= card.to_s %>
+		<% end %>
+</div>
 
-The dealer's cards are:
-<% session[:dealer_cards].each do |card| %>
-	<%= card.to_s %>
+<% if calculate_total(session[:player_cards]) < 21 %>
+	<div>
+		<h4>Your total is <%= calculate_total(session[:player_cards]) %>. Would you like to hit or stay? </h4>
+		<form action ="/hit" method="POST">
+			<input type="submit" class = "btn btn-info" value="Hit">
+		</form>
+		<form action="/stay" method="POST">
+			<input type="submit" class = "btn btn-warning" value="Stay">
+		</form>
+	</div>
 <% end %>

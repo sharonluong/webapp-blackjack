@@ -6,7 +6,7 @@ set :sessions, true
 helpers do
 
 	def calculate_total(cards)
-		arr = cards.map{|e| e[1]}
+		arr = cards.map{|e| e[0]}
 
 		total = 0
 		arr.each do |a|
@@ -38,6 +38,15 @@ end
 
 post '/new_game' do
 	session[:player_name] = params[:player_name]
+	redirect '/bet'
+end
+
+get '/bet' do 
+	erb :bet
+end
+
+post '/bet' do 
+	session[:bet] = params[:bet]
 	redirect '/game'
 end
 
@@ -52,6 +61,48 @@ get '/game' do
 	session[:dealer_cards] << session[:deck].pop
 	session[:player_cards] << session[:deck].pop
 	session[:dealer_cards] << session[:deck].pop
+
+	if calculate_total(session[:player_cards]) == 21
+		@yay = "You got 21. You win!"
+	end
 	
 	erb :game
 end
+
+post '/hit' do 
+	session[:player_cards] << session[:deck].pop
+
+	if calculate_total(session[:player_cards]) > 21
+		@error = 'You busted! Game over.'
+	elsif calculate_total(session[:player_cards]) == 21
+		@yay = "You got 21. You win!"
+	end
+
+	erb :game
+end
+
+post '/stay' do 
+	while calculate_total(session[:dealer_cards]) < 17
+		session[:dealer_cards] << session[:deck].pop
+		calculate_total(session[:dealer_cards])
+	end
+
+	if calculate_total(session[:dealer_cards]) == 21
+		@error = "The dealer has 21. You lost!"
+	elsif calculate_total(session[:dealer_cards]) < 21
+		if calculate_total(session[:player_cards]) > calculate_total(session[:dealer_cards])
+			@yay = "The dealer has " + calculate_total(session[:dealer_cards]).to_s + ". You beat the dealer! You win."
+		elsif calculate_total(session[:player_cards]) < calculate_total(session[:dealer_cards])
+			@error = "The dealer has " + calculate_total(session[:dealer_cards]).to_s + ". You lost!"
+		else
+			@tie = "You tied the dealer."
+		end
+	end
+			
+
+	erb :game
+end
+
+
+
+
