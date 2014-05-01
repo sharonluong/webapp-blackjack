@@ -48,17 +48,21 @@ helpers do
 		@show_decision = false
 		@show_dealer_cards = true
 		@not_show_first = false
-		@yay = "#{msg} #{session[:player_name]} wins and now has a total of $#{session[:pot].to_s}."
+		@winner = "#{msg} #{session[:player_name]} wins and now has a total of $#{session[:pot].to_s}."
 
 	end
 
 	def loser(msg)
 		session[:pot] -= session[:player_bet].to_i
-		@show_new_game = true
 		@show_decision = false
 		@show_dealer_cards = true
 		@not_show_first = false
-		@error = " #{msg} #{session[:player_name]} loses and now has a total of $#{session[:pot].to_s}."
+		@loser = " #{msg} #{session[:player_name]} loses and now has a total of $#{session[:pot].to_s}."
+		if session[:pot] == 0
+			@show_new_game = false
+		else
+			@show_new_game = true
+		end
 	end
 
 end
@@ -95,11 +99,13 @@ get '/bet' do
 end
 
 post '/bet' do 
-	session[:player_bet] = params[:player_bet]
-	if params[:player_bet].empty?
+	if params[:player_bet].nil? || params[:player_bet].to_i == 0
 		@error = "Please put in a valid bet."
 		halt erb(:bet)
+	elsif params[:player_bet].to_i > session[:pot]
+		@error = "You cannot bet more than you have in the pot."
 	else
+		session[:player_bet] = params[:player_bet].to_i
 		redirect '/game'
 	end
 end
@@ -133,15 +139,17 @@ post '/game/player/hit' do
 		winner("21!")
 	end
 
-	erb :game
+	erb :game, layout:false
 end
 
-post '/game/player/stay' do 
+post '/game/player/stay' do
+
 	redirect '/game/dealer'
 end
 
 get '/game/dealer' do
-
+	@not_show_first = false
+	@show_dealer_cards = true
 	calculate_total(session[:dealer_cards])
 
  	if calculate_total(session[:dealer_cards]) == 21
@@ -154,7 +162,7 @@ get '/game/dealer' do
 		@show_dealer_hit = true
 	end
 
-	erb :game
+	erb :game, layout:false
 end
 
 post '/game/dealer/hit' do 
@@ -189,6 +197,9 @@ get '/game/compare' do
 	erb :game
 end
 
+get '/game_over' do 
+	erb :game_over
+end
 
 
 
