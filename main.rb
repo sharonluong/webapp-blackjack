@@ -104,6 +104,7 @@ post '/bet' do
 		halt erb(:bet)
 	elsif params[:player_bet].to_i > session[:pot]
 		@error = "You cannot bet more than you have in the pot."
+		halt erb(:bet)
 	else
 		session[:player_bet] = params[:player_bet].to_i
 		redirect '/game'
