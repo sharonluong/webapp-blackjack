@@ -1,6 +1,6 @@
 <form class="form-search" method='post'>
 	<h3>What would you like to bet?</h3>
-		<h4><%= session[:player_name] %> has $500. </h4>
+		<h4><%= session[:player_name] %> has $<%= session[:pot] %>. </h4>
   		<input type="text" class="input-medium search-query" name="player_bet">
   	<button type="submit" class="btn">Submit</button>
 </form>

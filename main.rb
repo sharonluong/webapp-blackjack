@@ -42,13 +42,23 @@ helpers do
 		"<img src='/images/cards/#{suit}_#{value}.jpg'>"
 	end
 
-	def cash_total(bet)
-		cash_amount = 500
-		if @error
-			cash_amount -= bet
-		elsif @yay
-			cash_amount += bet
-		end
+	def winner(msg)
+		session[:pot] += session[:player_bet].to_i
+		@show_new_game = true
+		@show_decision = false
+		@show_dealer_cards = true
+		@not_show_first = false
+		@yay = "#{msg} #{session[:player_name]} wins and now has a total of $#{session[:pot].to_s}."
+
+	end
+
+	def loser(msg)
+		session[:pot] -= session[:player_bet].to_i
+		@show_new_game = true
+		@show_decision = false
+		@show_dealer_cards = true
+		@not_show_first = false
+		@error = " #{msg} #{session[:player_name]} loses and now has a total of $#{session[:pot].to_s}."
 	end
 
 end
@@ -74,18 +84,25 @@ post '/new_game' do
 		@error = "Please put in a player name."
 		halt erb(:new_game)
 	else
+		session[:pot] = 500
+		redirect '/bet'
+	end
+	
+end
+
+get '/bet' do 
+	erb :bet
+end
+
+post '/bet' do 
+	session[:player_bet] = params[:player_bet]
+	if params[:player_bet].empty?
+		@error = "Please put in a valid bet."
+		halt erb(:bet)
+	else
 		redirect '/game'
 	end
 end
-
-#get '/bet' do 
-	#erb :bet
-#end
-
-#post '/bet' do 
-	#session[:player_bet] = params[:player_bet]
-	#redirect '/game'
-#end
 
 get '/game' do
 	suits = %w[diamonds clubs hearts spades]
@@ -100,11 +117,7 @@ get '/game' do
 	session[:dealer_cards] << session[:deck].pop
 
 	if calculate_total(session[:player_cards]) == 21
-		@yay = "#{session[:player_name]} got 21. #{session[:player_name]} wins!"
-		@show_dealer_cards = false
-		@show_decision = false
-		@not_show_first = false
-		@show_dealer_hit = false
+		winner("21!")
 	end
 	
 	erb :game
@@ -115,16 +128,9 @@ post '/game/player/hit' do
 	session[:player_cards] << session[:deck].pop
 
 	if calculate_total(session[:player_cards]) > 21
-		@error = "#{session[:player_name]} busted! Game over."
-		@show_decision = false
-		@show_dealer_hit = false
-		@show_dealer_cards = true
-		@show_new_game = true
+		loser("Bust!")
 	elsif calculate_total(session[:player_cards]) == 21
-		@yay = "#{session[:player_name]} got 21. #{session[:player_name]} wins!"
-		@show_decision = false
-		@show_dealer_cards = true
-		@show_new_game = true
+		winner("21!")
 	end
 
 	erb :game
@@ -135,20 +141,13 @@ post '/game/player/stay' do
 end
 
 get '/game/dealer' do
-	@show_decision = false
-	@not_show_first = false
-	@show_dealer_cards = true
 
 	calculate_total(session[:dealer_cards])
 
  	if calculate_total(session[:dealer_cards]) == 21
-		@error = "The dealer has 21. #{session[:player_name]} lost!"
-		@not_show_first = false
-		@show_new_game = true
+		loser("The dealer has 21.")
 	elsif calculate_total(session[:dealer_cards]) > 21
-		@yay = "Dealer busted because they had #{calculate_total(session[:dealer_cards])}. #{session[:player_name]} wins!"
-		@not_show_first = false
-		@show_new_game = true
+		winner("Dealer busted because they had #{calculate_total(session[:dealer_cards])}.")
 	elsif calculate_total(session[:dealer_cards]) >= 17
 		redirect '/game/compare'
 	else
@@ -179,13 +178,11 @@ get '/game/compare' do
 	@show_dealer_cards = true
 
 	if calculate_total(session[:player_cards]) > calculate_total(session[:dealer_cards])
-		@yay = "The dealer has " + calculate_total(session[:dealer_cards]).to_s + ". You beat the dealer! You win."
-		@show_new_game = true
+		winner("The dealer has " + calculate_total(session[:dealer_cards]).to_s + ".")
 	elsif calculate_total(session[:player_cards]) < calculate_total(session[:dealer_cards])
-		@error = "The dealer has " + calculate_total(session[:dealer_cards]).to_s + ". You lost!"
-		@show_new_game = true
+		loser("The dealer has " + calculate_total(session[:dealer_cards]).to_s + ".")
 	else
-		@tie = "You tied the dealer."
+		@tie = "You tied the dealer. Here is your bet back."
 		@show_new_game = true
 	end
 

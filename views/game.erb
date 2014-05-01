@@ -39,6 +39,7 @@
 <% if @show_decision %>
 	<div>
 		<h4>Your total is <%= calculate_total(session[:player_cards]) %>. Would you like to hit or stay? </h4>
+		<p> Your pot is $<%= session[:pot].to_s %>. The bet this round is $<%= session[:player_bet] %>. </p>
 		<div>
 			<form action ="/game/player/hit" method="POST" class = "bottom_button">
 				<input type="submit" class = "btn btn-info" value="Hit">
